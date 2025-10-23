@@ -100,15 +100,28 @@ def check_bus_today():
 def submit_revision():
     try:
         data = request.json
+        ppu = data['ppu']
         
+        # Verificar si es tipo S (comienza con 'S')
+        es_tipo_s = ppu.startswith('S')
+        
+        # Datos base que SIEMPRE se registran
         revision_data = {
-            'ppu': data['ppu'],
+            'ppu': ppu,
             'fecha': data['fecha'],
-            'conectividad': data['conectividad'],
-            'motivo_no_conectividad': data.get('motivo_no_conectividad'),
-            'norma_grafica_correcta': data['norma_grafica_correcta'],
             'disco_duro': data['disco_duro']
         }
+        
+        # Solo agregar campos de conectividad y norma gráfica si es tipo S
+        if es_tipo_s:
+            revision_data['conectividad'] = data.get('conectividad')
+            revision_data['motivo_no_conectividad'] = data.get('motivo_no_conectividad')
+            revision_data['norma_grafica_correcta'] = data.get('norma_grafica_correcta')
+        else:
+            # Para buses NO tipo S, establecer estos campos como NULL
+            revision_data['conectividad'] = None
+            revision_data['motivo_no_conectividad'] = None
+            revision_data['norma_grafica_correcta'] = None
         
         result = supabase.table('revisiones').insert(revision_data).execute()
         
@@ -122,10 +135,12 @@ def dashboard_data():
         # Obtener todas las revisiones
         revisiones = supabase.table('revisiones').select('*').order('fecha', desc=True).execute()
         
-        # Calcular estadísticas
+        # Calcular estadísticas (solo contar los que tienen datos de conectividad - tipo S)
+        revisiones_tipo_s = [r for r in revisiones.data if r['conectividad'] is not None]
+        
         total = len(revisiones.data)
-        conectividad_ok = sum(1 for r in revisiones.data if r['conectividad'])
-        norma_grafica_ok = sum(1 for r in revisiones.data if r['norma_grafica_correcta'])
+        conectividad_ok = sum(1 for r in revisiones_tipo_s if r['conectividad'])
+        norma_grafica_ok = sum(1 for r in revisiones_tipo_s if r['norma_grafica_correcta'])
         disco_duro_ok = sum(1 for r in revisiones.data if r['disco_duro'])
         
         # Revisiones recientes
@@ -136,9 +151,9 @@ def dashboard_data():
             'stats': {
                 'total': total,
                 'conectividad_ok': conectividad_ok,
-                'conectividad_fail': total - conectividad_ok,
+                'conectividad_fail': len(revisiones_tipo_s) - conectividad_ok,
                 'norma_grafica_ok': norma_grafica_ok,
-                'norma_grafica_fail': total - norma_grafica_ok,
+                'norma_grafica_fail': len(revisiones_tipo_s) - norma_grafica_ok,
                 'disco_duro_ok': disco_duro_ok,
                 'disco_duro_fail': total - disco_duro_ok
             },
@@ -175,6 +190,7 @@ def export_excel():
         green_fill = PatternFill(start_color='10B981', end_color='10B981', fill_type='solid')
         red_fill = PatternFill(start_color='EF4444', end_color='EF4444', fill_type='solid')
         orange_fill = PatternFill(start_color='F59E0B', end_color='F59E0B', fill_type='solid')
+        gray_fill = PatternFill(start_color='6B7280', end_color='6B7280', fill_type='solid')
         white_font = Font(name='Arial', size=11, bold=True, color='FFFFFF')
         
         # Encabezados
@@ -231,11 +247,15 @@ def export_excel():
             cell.alignment = cell_alignment
             cell.border = border
             
-            # Conectividad
-            cell = ws.cell(row=row, column=5, value='OK' if rev['conectividad'] else 'FALLA')
+            # Conectividad (puede ser None para buses no tipo S)
+            if rev['conectividad'] is None:
+                cell = ws.cell(row=row, column=5, value='N/A')
+                cell.fill = gray_fill
+            else:
+                cell = ws.cell(row=row, column=5, value='OK' if rev['conectividad'] else 'FALLA')
+                cell.fill = green_fill if rev['conectividad'] else red_fill
             cell.alignment = cell_alignment
             cell.border = border
-            cell.fill = green_fill if rev['conectividad'] else red_fill
             cell.font = white_font
             
             # Motivo
@@ -244,11 +264,15 @@ def export_excel():
             cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
             cell.border = border
             
-            # Norma Gráfica
-            cell = ws.cell(row=row, column=7, value='OK' if rev['norma_grafica_correcta'] else 'FALLA')
+            # Norma Gráfica (puede ser None para buses no tipo S)
+            if rev['norma_grafica_correcta'] is None:
+                cell = ws.cell(row=row, column=7, value='N/A')
+                cell.fill = gray_fill
+            else:
+                cell = ws.cell(row=row, column=7, value='OK' if rev['norma_grafica_correcta'] else 'FALLA')
+                cell.fill = green_fill if rev['norma_grafica_correcta'] else red_fill
             cell.alignment = cell_alignment
             cell.border = border
-            cell.fill = green_fill if rev['norma_grafica_correcta'] else red_fill
             cell.font = white_font
             
             # Disco Duro
@@ -272,13 +296,15 @@ def export_excel():
         cell.alignment = header_alignment
         cell.border = border
         
-        # Estadísticas
+        # Estadísticas (solo contar tipo S para conectividad y norma gráfica)
+        revisiones_tipo_s = [r for r in revisiones.data if r['conectividad'] is not None]
+        
         stats = [
             ('Total Revisiones:', len(revisiones.data)),
-            ('Conectividad OK:', sum(1 for r in revisiones.data if r['conectividad'])),
-            ('Conectividad Falla:', sum(1 for r in revisiones.data if not r['conectividad'])),
-            ('Norma Gráfica OK:', sum(1 for r in revisiones.data if r['norma_grafica_correcta'])),
-            ('Norma Gráfica Falla:', sum(1 for r in revisiones.data if not r['norma_grafica_correcta'])),
+            ('Conectividad OK:', sum(1 for r in revisiones_tipo_s if r['conectividad'])),
+            ('Conectividad Falla:', sum(1 for r in revisiones_tipo_s if not r['conectividad'])),
+            ('Norma Gráfica OK:', sum(1 for r in revisiones_tipo_s if r['norma_grafica_correcta'])),
+            ('Norma Gráfica Falla:', sum(1 for r in revisiones_tipo_s if not r['norma_grafica_correcta'])),
             ('Disco Duro OK:', sum(1 for r in revisiones.data if r['disco_duro'])),
             ('Disco Duro Falta:', sum(1 for r in revisiones.data if not r['disco_duro'])),
         ]
