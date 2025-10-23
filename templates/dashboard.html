@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Revisión de Buses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <h1>📊 Dashboard de Revisiones</h1>
+            <div class="nav-actions">
+                <button id="exportBtn" class="nav-link export-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Excel
+                </button>
+                <a href="/" class="nav-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Nueva Revisión
+                </a>
+            </div>
+        </nav>
+
+        <div class="dashboard-container">
+            <!-- Estadísticas Rápidas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
+                            <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Revisiones</h3>
+                        <p class="stat-number" id="totalRevisiones">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Conectividad OK</h3>
+                        <p class="stat-number" id="conectividadOk">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon error">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Conectividad Falla</h3>
+                        <p class="stat-number" id="conectividadFail">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 9v4"></path>
+                            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+                            <path d="M12 16h.01"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Tasa de Éxito</h3>
+                        <p class="stat-number" id="tasaExito">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos Mejorados -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>🌐 Estado de Conectividad</h3>
+                        <p class="chart-subtitle">Estado actual de la conectividad en los buses</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="conectividadChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>🎨 Estado de Norma Gráfica</h3>
+                        <p class="chart-subtitle">Cumplimiento de normas gráficas</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="normaGraficaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>💾 Estado de Disco Duro</h3>
+                        <p class="chart-subtitle">Disponibilidad de discos duros</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="discoDuroChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card chart-card-full">
+                    <div class="chart-header">
+                        <h3>📈 Resumen General</h3>
+                        <p class="chart-subtitle">Comparativa de todos los indicadores</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="resumenChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revisiones Recientes -->
+            <div class="recent-reviews">
+                <div class="recent-header">
+                    <h3>📋 Revisiones Recientes</h3>
+                    <p class="recent-subtitle">Últimas 10 revisiones realizadas</p>
+                </div>
+                <div class="table-responsive">
+                    <table id="recentTable">
+                        <thead>
+                            <tr>
+                                <th>PPU</th>
+                                <th>Fecha</th>
+                                <th>Conectividad</th>
+                                <th>Norma Gráfica</th>
+                                <th>Disco Duro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTableBody">
+                            <tr>
+                                <td colspan="5" class="loading">Cargando datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+
+        // Evento del botón de exportación
+        document.addEventListener('DOMContentLoaded', function() {
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    window.location.href = '/api/export-excel';
+                });
+            }
+        });
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateStats(data.stats);
+                    updateCharts(data.stats);
+                    updateRecentTable(data.recientes);
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalRevisiones').textContent = stats.total;
+            document.getElementById('conectividadOk').textContent = stats.conectividad_ok;
+            document.getElementById('conectividadFail').textContent = stats.conectividad_fail;
+            
+            const tasaExito = stats.total > 0 
+                ? Math.round((stats.conectividad_ok / stats.total) * 100) 
+                : 0;
+            document.getElementById('tasaExito').textContent = tasaExito + '%';
+        }
+
+        function updateCharts(stats) {
+            const doughnutConfig = {
+                type: 'doughnut',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e0e0e0',
+                                padding: 20,
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            borderColor: '#ef4444',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            };
+
+            // Conectividad Chart
+            if (charts.conectividad) charts.conectividad.destroy();
+            charts.conectividad = new Chart(
+                document.getElementById('conectividadChart'),
+                {
+                    ...doughnutConfig,
+                    data: {
+                        labels: ['OK', 'Falla'],
+                        datasets: [{
+                            data: [stats.conectividad_ok, stats.conectividad_fail],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 3,
+                            borderColor: '#1a1a1a',
+                            hoverOffset: 8
+                        }]
+                    }
+                }
+            );
+
+            // Norma Gráfica Chart
+            if (charts.normaGrafica) charts.normaGrafica.destroy();
+            charts.normaGrafica = new Chart(
+                document.getElementById('normaGraficaChart'),
+                {
+                    ...doughnutConfig,
+                    data: {
+                        labels: ['Correcta', 'Incorrecta'],
+                        datasets: [{
+                            data: [stats.norma_grafica_ok, stats.norma_grafica_fail],
+                            backgroundColor: ['#10b981', '#ef4444'],
+                            borderWidth: 3,
+                            borderColor: '#1a1a1a',
+                            hoverOffset: 8
+                        }]
+                    }
+                }
+            );
+
+            // Disco Duro Chart
+            if (charts.discoDuro) charts.discoDuro.destroy();
+            charts.discoDuro = new Chart(
+                document.getElementById('discoDuroChart'),
+                {
+                    ...doughnutConfig,
+                    data: {
+                        labels: ['OK', 'Falta'],
+                        datasets: [{
+                            data: [stats.disco_duro_ok, stats.disco_duro_fail],
+                            backgroundColor: ['#10b981', '#f59e0b'],
+                            borderWidth: 3,
+                            borderColor: '#1a1a1a',
+                            hoverOffset: 8
+                        }]
+                    }
+                }
+            );
+
+            // Resumen Chart
+            if (charts.resumen) charts.resumen.destroy();
+            charts.resumen = new Chart(
+                document.getElementById('resumenChart'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: ['Conectividad', 'Norma Gráfica', 'Disco Duro'],
+                        datasets: [
+                            {
+                                label: 'OK',
+                                data: [stats.conectividad_ok, stats.norma_grafica_ok, stats.disco_duro_ok],
+                                backgroundColor: '#10b981',
+                                borderRadius: 8,
+                                borderSkipped: false
+                            },
+                            {
+                                label: 'Problemas',
+                                data: [stats.conectividad_fail, stats.norma_grafica_fail, stats.disco_duro_fail],
+                                backgroundColor: '#ef4444',
+                                borderRadius: 8,
+                                borderSkipped: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#e0e0e0',
+                                    padding: 20,
+                                    font: {
+                                        size: 13,
+                                        weight: '600'
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                borderColor: '#ef4444',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#9ca3af',
+                                    stepSize: 1,
+                                    font: {
+                                        size: 12,
+                                        weight: '600'
+                                    }
+                                },
+                                grid: {
+                                    color: '#2d2d2d',
+                                    lineWidth: 1
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 12,
+                                        weight: '600'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+        function updateRecentTable(recientes) {
+            const tbody = document.getElementById('recentTableBody');
+            
+            if (recientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">No hay revisiones registradas</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = recientes.map(rev => {
+                const fecha = new Date(rev.fecha);
+                const fechaFormateada = fecha.toLocaleDateString('es-CL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <tr>
+                        <td><strong class="ppu-badge">${rev.ppu}</strong></td>
+                        <td>${fechaFormateada}</td>
+                        <td><span class="badge ${rev.conectividad ? 'badge-success' : 'badge-error'}">${rev.conectividad ? '✓ OK' : '✗ Falla'}</span></td>
+                        <td><span class="badge ${rev.norma_grafica_correcta ? 'badge-success' : 'badge-error'}">${rev.norma_grafica_correcta ? '✓ OK' : '✗ Falla'}</span></td>
+                        <td><span class="badge ${rev.disco_duro ? 'badge-success' : 'badge-warning'}">${rev.disco_duro ? '✓ OK' : '⚠ Falta'}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Cargar datos al iniciar
+        loadDashboardData();
+
+        // Actualizar cada 30 segundos
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>

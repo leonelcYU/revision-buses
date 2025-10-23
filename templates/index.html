@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisión de Buses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <h1>Sistema de Revisión de Buses</h1>
+            <a href="/dashboard" class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Dashboard
+            </a>
+        </nav>
+
+        <div class="form-container">
+            <h2>Nueva Revisión</h2>
+            
+            <form id="revisionForm">
+                <!-- Búsqueda de PPU -->
+                <div class="form-group">
+                    <label for="ppuSearch">Buscar PPU</label>
+                    <div class="search-wrapper">
+                        <input 
+                            type="text" 
+                            id="ppuSearch" 
+                            placeholder="Ingrese parte de la patente (ej: WP57)" 
+                            autocomplete="off"
+                            required
+                        >
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                    <input type="hidden" id="ppuSelected" required>
+                    <div id="selectedPPU" class="selected-ppu"></div>
+                    <button type="button" id="changePPU" class="btn-change-ppu" style="display: none;">Cambiar PPU</button>
+                </div>
+
+                <!-- Fecha de Revisión -->
+                <div class="form-group">
+                    <label for="fechaRevision">Fecha de Revisión</label>
+                    <input type="datetime-local" id="fechaRevision" required>
+                </div>
+
+                <!-- Conectividad -->
+                <div class="form-group">
+                    <label>Conectividad</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="conectividad" value="si" required>
+                            <span>Sí</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="conectividad" value="no">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Motivo (condicional) -->
+                <div class="form-group" id="motivoGroup" style="display: none;">
+                    <label for="motivo">Motivo de falla de conectividad</label>
+                    <textarea id="motivo" rows="3" placeholder="Describa el motivo..."></textarea>
+                </div>
+
+                <!-- Norma Gráfica -->
+                <div class="form-group">
+                    <label>¿Norma Gráfica Correcta?</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="normaGrafica" value="si" required>
+                            <span>Sí</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="normaGrafica" value="no">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Disco Duro -->
+                <div class="form-group">
+                    <label>Disco Duro</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="discoDuro" value="si" required>
+                            <span>Sí</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="discoDuro" value="no">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Guardar Revisión</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        // Autocompletado de PPU
+        const ppuSearch = document.getElementById('ppuSearch');
+        const searchResults = document.getElementById('searchResults');
+        const ppuSelected = document.getElementById('ppuSelected');
+        const selectedPPU = document.getElementById('selectedPPU');
+        const changePPUBtn = document.getElementById('changePPU');
+
+        ppuSearch.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/search-bus?q=${encodeURIComponent(query)}`);
+                const buses = await response.json();
+
+                if (buses.length === 0) {
+                    searchResults.innerHTML = '<div class="search-item no-results">No se encontraron coincidencias</div>';
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.innerHTML = buses.map(bus => 
+                        `<div class="search-item" data-ppu="${bus}">${bus}</div>`
+                    ).join('');
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error buscando bus:', error);
+            }
+        });
+
+        searchResults.addEventListener('click', (e) => {
+            if (e.target.classList.contains('search-item') && !e.target.classList.contains('no-results')) {
+                const ppu = e.target.dataset.ppu;
+                ppuSearch.value = ppu; // Mantener el valor visible
+                ppuSelected.value = ppu;
+                selectedPPU.innerHTML = `<span class="badge">PPU Seleccionado: ${ppu}</span>`;
+                searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
+                ppuSearch.disabled = true; // Deshabilitar edición hasta limpiar
+                changePPUBtn.style.display = 'inline-block'; // Mostrar botón cambiar
+            }
+        });
+
+        // Botón para cambiar PPU
+        changePPUBtn.addEventListener('click', () => {
+            ppuSearch.value = '';
+            ppuSelected.value = '';
+            selectedPPU.innerHTML = '';
+            ppuSearch.disabled = false;
+            changePPUBtn.style.display = 'none';
+            ppuSearch.focus();
+        });
+
+        // Cerrar resultados al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Establecer fecha actual
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('fechaRevision').value = now.toISOString().slice(0, 16);
+
+        // Mostrar/ocultar motivo según conectividad
+        document.querySelectorAll('input[name="conectividad"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const motivoGroup = document.getElementById('motivoGroup');
+                const motivoInput = document.getElementById('motivo');
+                
+                if (e.target.value === 'no') {
+                    motivoGroup.style.display = 'block';
+                    motivoInput.required = true;
+                } else {
+                    motivoGroup.style.display = 'none';
+                    motivoInput.required = false;
+                    motivoInput.value = '';
+                }
+            });
+        });
+
+        // Envío del formulario
+        document.getElementById('revisionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const ppu = ppuSelected.value;
+            if (!ppu) {
+                showNotification('Por favor seleccione una PPU', 'error');
+                return;
+            }
+
+            const formData = {
+                ppu: ppu,
+                fecha: document.getElementById('fechaRevision').value,
+                conectividad: document.querySelector('input[name="conectividad"]:checked').value === 'si',
+                motivo_no_conectividad: document.getElementById('motivo').value || null,
+                norma_grafica_correcta: document.querySelector('input[name="normaGrafica"]:checked').value === 'si',
+                disco_duro: document.querySelector('input[name="discoDuro"]:checked').value === 'si'
+            };
+
+            try {
+                const response = await fetch('/api/submit-revision', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Revisión guardada exitosamente', 'success');
+                    e.target.reset();
+                    selectedPPU.innerHTML = '';
+                    ppuSelected.value = '';
+                    ppuSearch.value = '';
+                    ppuSearch.disabled = false;
+                    changePPUBtn.style.display = 'none';
+                    document.getElementById('motivoGroup').style.display = 'none';
+                    
+                    // Restablecer fecha actual
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    document.getElementById('fechaRevision').value = now.toISOString().slice(0, 16);
+                } else {
+                    showNotification('Error al guardar: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error de conexión: ' + error.message, 'error');
+            }
+        });
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
