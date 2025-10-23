@@ -249,7 +249,7 @@ def export_excel():
             
             # Conectividad (puede ser None para buses no tipo S)
             if rev['conectividad'] is None:
-                cell = ws.cell(row=row, column=5, value='N/A')
+                cell = ws.cell(row=row, column=5, value='Innecesario')
                 cell.fill = gray_fill
             else:
                 cell = ws.cell(row=row, column=5, value='OK' if rev['conectividad'] else 'FALLA')
@@ -266,7 +266,7 @@ def export_excel():
             
             # Norma Gráfica (puede ser None para buses no tipo S)
             if rev['norma_grafica_correcta'] is None:
-                cell = ws.cell(row=row, column=7, value='N/A')
+                cell = ws.cell(row=row, column=7, value='Innecesario')
                 cell.fill = gray_fill
             else:
                 cell = ws.cell(row=row, column=7, value='OK' if rev['norma_grafica_correcta'] else 'FALLA')
