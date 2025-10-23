@@ -70,6 +70,32 @@ def search_bus():
     matches = [bus for bus in BUSES if query in bus]
     return jsonify(matches)
 
+@app.route('/api/check-bus-today', methods=['GET'])
+def check_bus_today():
+    """Verificar si un bus ya fue registrado hoy"""
+    try:
+        ppu = request.args.get('ppu', '').upper()
+        if not ppu:
+            return jsonify({'registered': False})
+        
+        # Obtener fecha de hoy (inicio del día)
+        from datetime import date
+        today = date.today().isoformat()
+        
+        # Buscar registros de hoy para esta PPU
+        result = supabase.table('revisiones')\
+            .select('*')\
+            .eq('ppu', ppu)\
+            .gte('fecha', today)\
+            .execute()
+        
+        return jsonify({
+            'registered': len(result.data) > 0,
+            'count': len(result.data)
+        })
+    except Exception as e:
+        return jsonify({'registered': False, 'error': str(e)})
+
 @app.route('/api/submit-revision', methods=['POST'])
 def submit_revision():
     try:
