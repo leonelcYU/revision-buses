@@ -401,12 +401,23 @@
                     minute: '2-digit'
                 });
 
+                // Determinar si es tipo S (tiene datos de conectividad)
+                const esTipoS = rev.conectividad !== null;
+                
+                const conectividadBadge = esTipoS 
+                    ? `<span class="badge ${rev.conectividad ? 'badge-success' : 'badge-error'}">${rev.conectividad ? '✓ OK' : '✗ Falla'}</span>`
+                    : `<span class="badge badge-na">N/A</span>`;
+                    
+                const normaGraficaBadge = esTipoS
+                    ? `<span class="badge ${rev.norma_grafica_correcta ? 'badge-success' : 'badge-error'}">${rev.norma_grafica_correcta ? '✓ OK' : '✗ Falla'}</span>`
+                    : `<span class="badge badge-na">N/A</span>`;
+
                 return `
                     <tr>
                         <td><strong class="ppu-badge">${rev.ppu}</strong></td>
                         <td>${fechaFormateada}</td>
-                        <td><span class="badge ${rev.conectividad ? 'badge-success' : 'badge-error'}">${rev.conectividad ? '✓ OK' : '✗ Falla'}</span></td>
-                        <td><span class="badge ${rev.norma_grafica_correcta ? 'badge-success' : 'badge-error'}">${rev.norma_grafica_correcta ? '✓ OK' : '✗ Falla'}</span></td>
+                        <td>${conectividadBadge}</td>
+                        <td>${normaGraficaBadge}</td>
                         <td><span class="badge ${rev.disco_duro ? 'badge-success' : 'badge-warning'}">${rev.disco_duro ? '✓ OK' : '⚠ Falta'}</span></td>
                     </tr>
                 `;

@@ -40,6 +40,7 @@
                     </div>
                     <input type="hidden" id="ppuSelected" required>
                     <div id="selectedPPU" class="selected-ppu"></div>
+                    <div id="ppuAlert" class="ppu-alert" style="display: none;"></div>
                     <button type="button" id="changePPU" class="btn-change-ppu" style="display: none;">Cambiar PPU</button>
                 </div>
 
@@ -49,43 +50,46 @@
                     <input type="datetime-local" id="fechaRevision" required>
                 </div>
 
-                <!-- Conectividad -->
-                <div class="form-group">
-                    <label>Conectividad</label>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="conectividad" value="si" required>
-                            <span>Sí</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="conectividad" value="no">
-                            <span>No</span>
-                        </label>
+                <!-- Campos para PPUs tipo "S" -->
+                <div id="camposTipoS" style="display: none;">
+                    <!-- Conectividad -->
+                    <div class="form-group">
+                        <label>Conectividad</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="conectividad" value="si">
+                                <span>Sí</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="conectividad" value="no">
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Motivo (condicional) -->
+                    <div class="form-group" id="motivoGroup" style="display: none;">
+                        <label for="motivo">Motivo de falla de conectividad</label>
+                        <textarea id="motivo" rows="3" placeholder="Describa el motivo..."></textarea>
+                    </div>
+
+                    <!-- Norma Gráfica -->
+                    <div class="form-group">
+                        <label>¿Norma Gráfica Correcta?</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="normaGrafica" value="si">
+                                <span>Sí</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="normaGrafica" value="no">
+                                <span>No</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Motivo (condicional) -->
-                <div class="form-group" id="motivoGroup" style="display: none;">
-                    <label for="motivo">Motivo de falla de conectividad</label>
-                    <textarea id="motivo" rows="3" placeholder="Describa el motivo..."></textarea>
-                </div>
-
-                <!-- Norma Gráfica -->
-                <div class="form-group">
-                    <label>¿Norma Gráfica Correcta?</label>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="normaGrafica" value="si" required>
-                            <span>Sí</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="normaGrafica" value="no">
-                            <span>No</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Disco Duro -->
+                <!-- Disco Duro (para TODAS las PPUs) -->
                 <div class="form-group">
                     <label>Disco Duro</label>
                     <div class="radio-group">
@@ -112,13 +116,17 @@
     </div>
 
     <script>
-        // Autocompletado de PPU
+        // Variables globales
         const ppuSearch = document.getElementById('ppuSearch');
         const searchResults = document.getElementById('searchResults');
         const ppuSelected = document.getElementById('ppuSelected');
         const selectedPPU = document.getElementById('selectedPPU');
         const changePPUBtn = document.getElementById('changePPU');
+        const ppuAlert = document.getElementById('ppuAlert');
+        const camposTipoS = document.getElementById('camposTipoS');
+        let esTipoS = false;
 
+        // Autocompletado de PPU
         ppuSearch.addEventListener('input', async (e) => {
             const query = e.target.value.trim();
             
@@ -146,26 +154,80 @@
             }
         });
 
-        searchResults.addEventListener('click', (e) => {
+        // Selección de PPU
+        searchResults.addEventListener('click', async (e) => {
             if (e.target.classList.contains('search-item') && !e.target.classList.contains('no-results')) {
                 const ppu = e.target.dataset.ppu;
-                ppuSearch.value = ppu; // Mantener el valor visible
-                ppuSelected.value = ppu;
-                selectedPPU.innerHTML = `<span class="badge">PPU Seleccionado: ${ppu}</span>`;
-                searchResults.innerHTML = '';
-                searchResults.style.display = 'none';
-                ppuSearch.disabled = true; // Deshabilitar edición hasta limpiar
-                changePPUBtn.style.display = 'inline-block'; // Mostrar botón cambiar
+                await seleccionarPPU(ppu);
             }
         });
+
+        async function seleccionarPPU(ppu) {
+            ppuSearch.value = ppu;
+            ppuSelected.value = ppu;
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            ppuSearch.disabled = true;
+            changePPUBtn.style.display = 'inline-block';
+
+            // Determinar si es tipo S
+            esTipoS = ppu.startsWith('S');
+            
+            // Mostrar/ocultar campos según tipo
+            if (esTipoS) {
+                camposTipoS.style.display = 'block';
+                selectedPPU.innerHTML = `<span class="badge badge-tipo-s">PPU Seleccionado: ${ppu} (Tipo S - Registro Completo)</span>`;
+                // Hacer campos obligatorios
+                document.querySelectorAll('#camposTipoS input[type="radio"]').forEach(radio => {
+                    radio.required = true;
+                });
+            } else {
+                camposTipoS.style.display = 'none';
+                selectedPPU.innerHTML = `<span class="badge badge-tipo-normal">PPU Seleccionado: ${ppu} (Solo Disco Duro)</span>`;
+                // Quitar obligatoriedad
+                document.querySelectorAll('#camposTipoS input[type="radio"]').forEach(radio => {
+                    radio.required = false;
+                    radio.checked = false;
+                });
+            }
+
+            // Verificar si ya fue registrado hoy
+            await verificarRegistroHoy(ppu);
+        }
+
+        async function verificarRegistroHoy(ppu) {
+            try {
+                const response = await fetch(`/api/check-bus-today?ppu=${encodeURIComponent(ppu)}`);
+                const data = await response.json();
+
+                if (data.registered) {
+                    ppuAlert.innerHTML = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>⚠️ Este bus ya tiene ${data.count} registro(s) hoy. ¿Deseas registrar otro?</span>
+                    `;
+                    ppuAlert.style.display = 'flex';
+                } else {
+                    ppuAlert.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error verificando registro:', error);
+            }
+        }
 
         // Botón para cambiar PPU
         changePPUBtn.addEventListener('click', () => {
             ppuSearch.value = '';
             ppuSelected.value = '';
             selectedPPU.innerHTML = '';
+            ppuAlert.style.display = 'none';
             ppuSearch.disabled = false;
             changePPUBtn.style.display = 'none';
+            camposTipoS.style.display = 'none';
+            document.getElementById('motivoGroup').style.display = 'none';
             ppuSearch.focus();
         });
 
@@ -181,7 +243,7 @@
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         document.getElementById('fechaRevision').value = now.toISOString().slice(0, 16);
 
-        // Mostrar/ocultar motivo según conectividad
+        // Mostrar/ocultar motivo según conectividad (solo para tipo S)
         document.querySelectorAll('input[name="conectividad"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 const motivoGroup = document.getElementById('motivoGroup');
@@ -211,11 +273,23 @@
             const formData = {
                 ppu: ppu,
                 fecha: document.getElementById('fechaRevision').value,
-                conectividad: document.querySelector('input[name="conectividad"]:checked').value === 'si',
-                motivo_no_conectividad: document.getElementById('motivo').value || null,
-                norma_grafica_correcta: document.querySelector('input[name="normaGrafica"]:checked').value === 'si',
                 disco_duro: document.querySelector('input[name="discoDuro"]:checked').value === 'si'
             };
+
+            // Solo agregar campos de conectividad y norma gráfica si es tipo S
+            if (esTipoS) {
+                const conectividadChecked = document.querySelector('input[name="conectividad"]:checked');
+                const normaGraficaChecked = document.querySelector('input[name="normaGrafica"]:checked');
+
+                if (!conectividadChecked || !normaGraficaChecked) {
+                    showNotification('Por favor complete todos los campos obligatorios', 'error');
+                    return;
+                }
+
+                formData.conectividad = conectividadChecked.value === 'si';
+                formData.motivo_no_conectividad = document.getElementById('motivo').value || null;
+                formData.norma_grafica_correcta = normaGraficaChecked.value === 'si';
+            }
 
             try {
                 const response = await fetch('/api/submit-revision', {
@@ -236,7 +310,10 @@
                     ppuSearch.value = '';
                     ppuSearch.disabled = false;
                     changePPUBtn.style.display = 'none';
+                    ppuAlert.style.display = 'none';
+                    camposTipoS.style.display = 'none';
                     document.getElementById('motivoGroup').style.display = 'none';
+                    esTipoS = false;
                     
                     // Restablecer fecha actual
                     const now = new Date();
