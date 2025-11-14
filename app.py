@@ -53,14 +53,33 @@ BUSES = [
     "SKPL33", "SKPL34", "SKPL36"
 ]
 
+# ========== RUTAS PRINCIPALES ==========
 @app.route('/')
 def index():
-    return render_template('index.html', buses=BUSES)
-
-@app.route('/dashboard')
-def dashboard():
+    """Dashboard como página principal"""
     return render_template('dashboard.html')
 
+@app.route('/levantamiento/wifi')
+def levantamiento_wifi():
+    """Página de levantamiento WiFi/Conectividad"""
+    return render_template('levantamiento_wifi.html', buses=BUSES)
+
+@app.route('/levantamiento/disco')
+def levantamiento_disco():
+    """Página de levantamiento Disco Duro"""
+    return render_template('levantamiento_disco.html', buses=BUSES)
+
+@app.route('/historial')
+def historial():
+    """Página de historial completo"""
+    return render_template('historial.html')
+
+@app.route('/exportar')
+def exportar():
+    """Página de exportación"""
+    return render_template('exportar.html')
+
+# ========== API ENDPOINTS ==========
 @app.route('/api/search-bus', methods=['GET'])
 def search_bus():
     query = request.args.get('q', '').upper()
@@ -78,11 +97,9 @@ def check_bus_today():
         if not ppu:
             return jsonify({'registered': False})
         
-        # Obtener fecha de hoy (inicio del día)
         from datetime import date
         today = date.today().isoformat()
         
-        # Buscar registros de hoy para esta PPU
         result = supabase.table('revisiones')\
             .select('*')\
             .eq('ppu', ppu)\
@@ -102,10 +119,10 @@ def submit_revision():
         data = request.json
         ppu = data['ppu']
         
-        # Verificar si es tipo S (comienza con 'S')
+        # Verificar si es tipo S
         es_tipo_s = ppu.startswith('S')
         
-        # Datos base que SIEMPRE se registran
+        # Datos base
         revision_data = {
             'ppu': ppu,
             'fecha': data['fecha'],
@@ -118,7 +135,6 @@ def submit_revision():
             revision_data['motivo_no_conectividad'] = data.get('motivo_no_conectividad')
             revision_data['norma_grafica_correcta'] = data.get('norma_grafica_correcta')
         else:
-            # Para buses NO tipo S, establecer estos campos como NULL
             revision_data['conectividad'] = None
             revision_data['motivo_no_conectividad'] = None
             revision_data['norma_grafica_correcta'] = None
@@ -132,10 +148,9 @@ def submit_revision():
 @app.route('/api/dashboard-data', methods=['GET'])
 def dashboard_data():
     try:
-        # Obtener todas las revisiones
         revisiones = supabase.table('revisiones').select('*').order('fecha', desc=True).execute()
         
-        # Calcular estadísticas (solo contar los que tienen datos de conectividad - tipo S)
+        # Solo contar tipo S para conectividad
         revisiones_tipo_s = [r for r in revisiones.data if r['conectividad'] is not None]
         
         total = len(revisiones.data)
@@ -143,7 +158,6 @@ def dashboard_data():
         norma_grafica_ok = sum(1 for r in revisiones_tipo_s if r['norma_grafica_correcta'])
         disco_duro_ok = sum(1 for r in revisiones.data if r['disco_duro'])
         
-        # Revisiones recientes
         recientes = revisiones.data[:10] if len(revisiones.data) > 10 else revisiones.data
         
         return jsonify({
@@ -165,10 +179,8 @@ def dashboard_data():
 @app.route('/api/export-excel', methods=['GET'])
 def export_excel():
     try:
-        # Obtener todas las revisiones
         revisiones = supabase.table('revisiones').select('*').order('fecha', desc=True).execute()
         
-        # Crear workbook
         wb = Workbook()
         ws = wb.active
         ws.title = "Revisiones de Buses"
@@ -186,7 +198,6 @@ def export_excel():
             bottom=Side(style='thin', color='000000')
         )
         
-        # Colores para estados
         green_fill = PatternFill(start_color='10B981', end_color='10B981', fill_type='solid')
         red_fill = PatternFill(start_color='EF4444', end_color='EF4444', fill_type='solid')
         orange_fill = PatternFill(start_color='F59E0B', end_color='F59E0B', fill_type='solid')
@@ -205,19 +216,16 @@ def export_excel():
             cell.alignment = header_alignment
             cell.border = border
         
-        # Ajustar anchos de columna
         column_widths = [8, 12, 14, 10, 15, 35, 15, 15]
         for i, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(i)].width = width
         
-        # Altura de la fila de encabezado
         ws.row_dimensions[1].height = 30
         
         # Datos
         for idx, rev in enumerate(revisiones.data, 1):
             row = idx + 1
             
-            # Parsear fecha
             try:
                 fecha_obj = datetime.fromisoformat(rev['fecha'].replace('Z', '+00:00'))
                 fecha_str = fecha_obj.strftime('%d/%m/%Y')
@@ -247,7 +255,7 @@ def export_excel():
             cell.alignment = cell_alignment
             cell.border = border
             
-            # Conectividad (puede ser None para buses no tipo S)
+            # Conectividad
             if rev['conectividad'] is None:
                 cell = ws.cell(row=row, column=5, value='Innecesario')
                 cell.fill = gray_fill
@@ -264,7 +272,7 @@ def export_excel():
             cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
             cell.border = border
             
-            # Norma Gráfica (puede ser None para buses no tipo S)
+            # Norma Gráfica
             if rev['norma_grafica_correcta'] is None:
                 cell = ws.cell(row=row, column=7, value='Innecesario')
                 cell.fill = gray_fill
@@ -282,13 +290,11 @@ def export_excel():
             cell.fill = green_fill if rev['disco_duro'] else orange_fill
             cell.font = white_font
             
-            # Altura de fila
             ws.row_dimensions[row].height = 25
         
-        # Agregar resumen al final
+        # Resumen
         summary_row = len(revisiones.data) + 3
         
-        # Título del resumen
         ws.merge_cells(f'A{summary_row}:B{summary_row}')
         cell = ws.cell(row=summary_row, column=1, value='RESUMEN ESTADÍSTICO')
         cell.font = Font(name='Arial', size=13, bold=True, color='FFFFFF')
@@ -296,7 +302,6 @@ def export_excel():
         cell.alignment = header_alignment
         cell.border = border
         
-        # Estadísticas (solo contar tipo S para conectividad y norma gráfica)
         revisiones_tipo_s = [r for r in revisiones.data if r['conectividad'] is not None]
         
         stats = [
@@ -321,12 +326,10 @@ def export_excel():
             cell.alignment = cell_alignment
             cell.border = border
         
-        # Guardar en memoria
         output = BytesIO()
         wb.save(output)
         output.seek(0)
         
-        # Generar nombre de archivo con fecha
         filename = f'revisiones_buses_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
         
         return send_file(
