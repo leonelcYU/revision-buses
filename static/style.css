@@ -10,18 +10,19 @@
     --primary-red-dark: #dc2626;
     --primary-red-light: #f87171;
     --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
+    --bg-secondary: #f3f4f6;
     --bg-tertiary: #ffffff;
     --bg-card: #ffffff;
     --text-primary: #1a1a1a;
     --text-secondary: #4b5563;
     --text-muted: #6b7280;
-    --border-color: #e5e7eb;
+    --border-color: #000000;
+    --border-light: #e5e7eb;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --sidebar-bg: #ffffff;
-    --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    --sidebar-bg: #f9fafb;
+    --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* ========== VARIABLES - MODO NOCHE ========== */
@@ -36,12 +37,13 @@
     --text-primary: #ffffff;
     --text-secondary: #e0e0e0;
     --text-muted: #9ca3af;
-    --border-color: #2d2d2d;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-    --sidebar-bg: #0f0f0f;
-    --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    --border-color: #000000;
+    --border-light: #2d2d2d;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.7);
+    --sidebar-bg: #171717;
+    --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.8);
 }
 
 /* Colores constantes */
@@ -67,7 +69,7 @@ body {
     width: 280px;
     height: 100vh;
     background: var(--sidebar-bg);
-    border-right: 1px solid var(--border-color);
+    border-right: 2px solid var(--border-color);
     box-shadow: var(--sidebar-shadow);
     display: flex;
     flex-direction: column;
@@ -80,7 +82,7 @@ body {
 
 .sidebar-header {
     padding: 24px 20px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
 }
 
 .logo {
@@ -133,7 +135,7 @@ body {
 }
 
 .nav-item.active {
-    background-color: rgba(239, 68, 68, 0.1);
+    background-color: rgba(239, 68, 68, 0.15);
     color: var(--primary-red);
     font-weight: 600;
 }
@@ -170,7 +172,7 @@ body {
 
 .sidebar-footer {
     padding: 20px;
-    border-top: 1px solid var(--border-color);
+    border-top: 2px solid var(--border-color);
 }
 
 .theme-toggle {
@@ -200,6 +202,10 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+.theme-btn svg {
+    flex-shrink: 0;
+}
+
 [data-theme="light"] .moon-icon {
     display: none;
 }
@@ -220,7 +226,7 @@ body {
 
 .top-header {
     background-color: var(--bg-primary);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
     padding: 20px 32px;
     display: flex;
     justify-content: space-between;
@@ -279,6 +285,7 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
+    border: 2px solid var(--border-color);
 }
 
 .content-wrapper {
@@ -298,7 +305,7 @@ body {
     background: var(--bg-card);
     padding: 24px;
     border-radius: 16px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 20px;
@@ -322,6 +329,7 @@ body {
     justify-content: center;
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    border: 2px solid var(--border-color);
 }
 
 .stat-icon.success {
@@ -380,7 +388,7 @@ body {
 
 .levantamiento-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
     box-shadow: var(--shadow-sm);
@@ -413,6 +421,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: 2px solid var(--border-color);
 }
 
 .levantamiento-icon.wifi {
@@ -457,16 +466,19 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    border: 1px solid var(--border-color);
 }
 
 .levantamiento-badge.active {
     background-color: rgba(16, 185, 129, 0.2);
     color: var(--success-color);
+    border-color: var(--success-color);
 }
 
 .levantamiento-badge.soon {
     background-color: rgba(245, 158, 11, 0.2);
     color: var(--warning-color);
+    border-color: var(--warning-color);
 }
 
 .levantamiento-stats {
@@ -501,6 +513,7 @@ body {
     background-color: var(--bg-secondary);
     border-radius: 20px;
     overflow: hidden;
+    border: 1px solid var(--border-light);
 }
 
 .progress-fill {
@@ -585,7 +598,7 @@ body {
     background: var(--bg-card);
     padding: 28px;
     border-radius: 16px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
 }
@@ -638,7 +651,7 @@ body {
     padding: 32px;
     border-radius: 16px;
     box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     max-width: 800px;
     margin: 0 auto;
 }
@@ -699,14 +712,14 @@ textarea {
     top: 100%;
     left: 0;
     right: 0;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-card);
     border: 2px solid var(--primary-red);
     border-top: none;
     border-radius: 0 0 8px 8px;
     max-height: 250px;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-lg);
     display: none;
 }
 
@@ -714,7 +727,7 @@ textarea {
     padding: 12px 16px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .search-item:last-child {
@@ -753,7 +766,7 @@ textarea {
     align-items: center;
     cursor: pointer;
     padding: 10px 18px;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     border: 2px solid var(--border-color);
     border-radius: 8px;
     transition: all 0.3s ease;
@@ -795,7 +808,7 @@ textarea {
 
 .btn {
     padding: 14px 28px;
-    border: none;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
@@ -810,6 +823,7 @@ textarea {
     color: white;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     flex: 1;
+    border-color: var(--primary-red);
 }
 
 .btn-primary:hover {
@@ -818,15 +832,16 @@ textarea {
 }
 
 .btn-secondary {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     color: var(--text-secondary);
     border: 2px solid var(--border-color);
     flex: 1;
 }
 
 .btn-secondary:hover {
-    background-color: var(--bg-primary);
+    background-color: var(--bg-tertiary);
     color: var(--text-primary);
+    border-color: var(--primary-red);
 }
 
 /* ========== TABLE ========== */
@@ -834,7 +849,7 @@ textarea {
     background: var(--bg-card);
     padding: 28px;
     border-radius: 16px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     box-shadow: var(--shadow-sm);
 }
 
@@ -864,6 +879,9 @@ textarea {
 table {
     width: 100%;
     border-collapse: collapse;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 thead {
@@ -875,7 +893,7 @@ thead th {
     text-align: left;
     font-weight: 700;
     color: var(--text-secondary);
-    border-bottom: 2px solid var(--primary-red);
+    border-bottom: 2px solid var(--border-color);
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -883,7 +901,7 @@ thead th {
 
 tbody td {
     padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light);
     color: var(--text-secondary);
 }
 
@@ -902,26 +920,31 @@ tbody tr:last-child td {
     border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 700;
+    border: 1px solid;
 }
 
 .badge-success {
     background-color: rgba(16, 185, 129, 0.2);
     color: var(--success-color);
+    border-color: var(--success-color);
 }
 
 .badge-error {
     background-color: rgba(239, 68, 68, 0.2);
     color: var(--error-color);
+    border-color: var(--error-color);
 }
 
 .badge-warning {
     background-color: rgba(245, 158, 11, 0.2);
     color: var(--warning-color);
+    border-color: var(--warning-color);
 }
 
 .badge-na {
     background-color: rgba(107, 114, 128, 0.2);
     color: var(--text-muted);
+    border-color: var(--text-muted);
 }
 
 .ppu-badge {
@@ -930,24 +953,17 @@ tbody tr:last-child td {
     border-radius: 6px;
     color: white !important;
     font-weight: 700;
+    border: 2px solid var(--border-color);
 }
 
 .badge-tipo-s {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    animation: pulse 2s infinite;
+    border: 2px solid var(--border-color);
 }
 
 .badge-tipo-normal {
     background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-dark) 100%);
-}
-
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-    }
+    border: 2px solid var(--border-color);
 }
 
 .loading, .no-data {
@@ -970,28 +986,18 @@ tbody tr:last-child td {
     color: var(--warning-color);
     font-weight: 600;
     font-size: 0.9rem;
-    animation: slideIn 0.3s ease;
 }
 
 .ppu-alert svg {
     flex-shrink: 0;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* Continuación del CSS */
 
 .btn-change-ppu {
     margin-top: 10px;
     padding: 8px 16px;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     color: var(--text-secondary);
     border: 2px solid var(--border-color);
     border-radius: 6px;
@@ -1020,6 +1026,7 @@ tbody tr:last-child td {
     transition: transform 0.3s ease;
     z-index: 2000;
     max-width: 350px;
+    border: 2px solid var(--border-color);
 }
 
 .notification.show {
@@ -1029,11 +1036,13 @@ tbody tr:last-child td {
 .notification.success {
     background-color: var(--success-color);
     color: white;
+    border-color: #059669;
 }
 
 .notification.error {
     background-color: var(--error-color);
     color: white;
+    border-color: var(--primary-red-dark);
 }
 
 /* ========== RESPONSIVE ========== */
@@ -1165,11 +1174,30 @@ tbody tr:last-child td {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: var(--border-color);
+    background: var(--border-light);
     border-radius: 3px;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-red);
+}
+
+/* Scrollbar para otros elementos */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
     background: var(--primary-red);
 }
 
@@ -1182,6 +1210,26 @@ tbody tr:last-child td {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
     }
 }
 
@@ -1278,16 +1326,11 @@ select:disabled {
     }
 }
 
-/* ========== DARK MODE ESPECÍFICO PARA GRÁFICOS ========== */
-[data-theme="dark"] canvas {
-    filter: brightness(0.95);
-}
-
 /* ========== LOADING SPINNER ========== */
 .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid var(--border-color);
+    border: 4px solid var(--border-light);
     border-top-color: var(--primary-red);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -1324,7 +1367,7 @@ select:disabled {
     font-size: 0.95rem;
 }
 
-/* ========== TOOLTIPS (opcional) ========== */
+/* ========== TOOLTIPS ========== */
 .tooltip {
     position: relative;
     cursor: help;
@@ -1346,82 +1389,14 @@ select:disabled {
     pointer-events: none;
     transition: opacity 0.3s ease;
     margin-bottom: 8px;
+    border: 1px solid var(--border-color);
 }
 
 .tooltip:hover::after {
     opacity: 1;
 }
 
-/* ========== MODALES (para futuro uso) ========== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.modal {
-    background-color: var(--bg-card);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.modal-overlay.active .modal {
-    transform: scale(1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.modal-header h2 {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-    background-color: var(--bg-secondary);
-    color: var(--primary-red);
-}
-
-/* ========== BREADCRUMBS (para navegación) ========== */
+/* ========== BREADCRUMBS ========== */
 .breadcrumbs {
     display: flex;
     align-items: center;
@@ -1449,10 +1424,10 @@ select:disabled {
     color: var(--text-muted);
 }
 
-/* ========== CARDS ALTERNATIVAS ========== */
+/* ========== INFO CARDS ========== */
 .info-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
@@ -1484,31 +1459,38 @@ select:disabled {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 4px;
+    border: 1px solid;
 }
 
 .tag-primary {
     background-color: rgba(239, 68, 68, 0.2);
     color: var(--primary-red);
+    border-color: var(--primary-red);
 }
 
 .tag-success {
     background-color: rgba(16, 185, 129, 0.2);
     color: var(--success-color);
+    border-color: var(--success-color);
 }
 
 .tag-warning {
     background-color: rgba(245, 158, 11, 0.2);
     color: var(--warning-color);
+    border-color: var(--warning-color);
 }
 
 .tag-info {
     background-color: rgba(59, 130, 246, 0.2);
     color: var(--info-color);
+    border-color: var(--info-color);
 }
 
-/* ========== SMOOTH TRANSITIONS GLOBALES ========== */
+/* ========== TRANSICIONES SUAVES ========== */
 * {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition-property: background-color, color, border-color, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
 }
 
 button,
@@ -1518,3 +1500,60 @@ textarea,
 select {
     transition: all 0.3s ease;
 }
+
+/* ========== MEJORAS VISUALES MODO DÍA/NOCHE ========== */
+[data-theme="light"] {
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* Mejorar contraste de textos en modo oscuro */
+[data-theme="dark"] .stat-content h3,
+[data-theme="dark"] .chart-subtitle,
+[data-theme="dark"] .table-subtitle {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .stat-number,
+[data-theme="dark"] .page-title {
+    color: #ffffff;
+}
+
+/* ========== MODO CLARO ESPECÍFICO ========== */
+[data-theme="light"] .sidebar {
+    background: #f9fafb;
+}
+
+[data-theme="light"] .nav-item:hover {
+    background-color: #f3f4f6;
+}
+
+[data-theme="light"] .stat-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .levantamiento-card,
+[data-theme="light"] .table-container {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== MODO OSCURO ESPECÍFICO ========== */
+[data-theme="dark"] .sidebar {
+    background: #171717;
+}
+
+[data-theme="dark"] .nav-item:hover {
+    background-color: #1f1f1f;
+}
+
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .levantamiento-card,
+[data-theme="dark"] .table-container {
+    background: #1a1a1a;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* FIN DEL ARCHIVO CSS */
