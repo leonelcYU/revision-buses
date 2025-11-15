@@ -139,7 +139,7 @@
 
     <div id="notification" class="notification"></div>
 
-   <script>
+<script>
     // Theme Toggle - CORREGIDO
     const themeToggle = document.getElementById('themeToggle');
     const html = document.documentElement;
@@ -163,12 +163,15 @@
         themeLabel.textContent = theme === 'light' ? 'Modo Día' : 'Modo Noche';
     }
 
-    // Mobile Menu Toggle
+    // Mobile Menu Toggle - MEJORADO
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
 
-    menuToggle.addEventListener('click', () => {
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
         sidebar.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
     });
 
     // Cerrar sidebar al hacer clic fuera en mobile
@@ -176,7 +179,16 @@
         if (window.innerWidth <= 768) {
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                 sidebar.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
             }
+        }
+    });
+
+    // Cerrar sidebar al cambiar el tamaño de ventana
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
         }
     });
 
